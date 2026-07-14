@@ -1,8 +1,0 @@
-{
-  "baseUrl": "https://serverest.dev/",
-  "viewportWidth": 1280,
-  "viewportHeight": 720,
-  "video": false,
-  "screenshotsFolder": "cypress/screenshots",
-  "videosFolder": "cypress/videos"
-}
