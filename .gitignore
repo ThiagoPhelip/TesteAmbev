@@ -1,0 +1,14 @@
+# Dependências
+node_modules/
+
+# Evidências locais (geradas em cada execução)
+cypress/videos/
+cypress/screenshots/
+
+# Logs e caches
+*.log
+npm-debug.log*
+.DS_Store
+
+# Cypress
+cypress.env.json
