@@ -1,7 +1,7 @@
 # 🌟 Pontos Fortes do Projeto (Arquitetura Enterprise)
 
 Documento que descreve exatamente os pontos fortes da automação Cypress para o ServeRest,
-seguindo padrões de equipes de QA Automation de empresas internacionais.
+seguindo padrões de equipes de QA Automation.
 
 ---
 
