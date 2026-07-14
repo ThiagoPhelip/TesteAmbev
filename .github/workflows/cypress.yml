@@ -1,0 +1,85 @@
+name: Cypress Tests
+
+on:
+  push:
+    branches: [master, Projeto]
+  pull_request:
+    branches: [master]
+
+jobs:
+  api-tests:
+    name: API Tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run API tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run api
+          install: false
+
+      - name: Upload Mochawesome report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome-api-node-${{ matrix.node }}
+          path: cypress/reports
+          if-no-files-found: ignore
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-api-node-${{ matrix.node }}
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-api-node-${{ matrix.node }}
+          path: cypress/videos
+          if-no-files-found: ignore
+
+  frontend-tests:
+    name: Frontend Tests (documentado)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Frontend tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run frontend
+          install: false
+        continue-on-error: true

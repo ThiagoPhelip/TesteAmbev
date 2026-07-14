@@ -12,3 +12,9 @@ npm-debug.log*
 
 # Cypress
 cypress.env.json
+
+# Variáveis de ambiente (nunca versionar)
+.env
+
+# Relatórios gerados
+cypress/reports/

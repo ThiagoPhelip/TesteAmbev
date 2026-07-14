@@ -1,241 +1,175 @@
-# ServeRest Automation — Cypress E2E (API + Frontend)
+# ServeRest Cypress Automation
 
-Projeto de testes automatizados E2E utilizando **Cypress** + **JavaScript**, cobrindo o
-frontend e a API da aplicação [ServeRest](https://serverest.dev/).
-
-O projeto foi construído para demonstrar **boas práticas de automação**, **design patterns**
-(Page Object / Service Objects, Custom Commands) e **evidências claras** de testes que
-passam e de testes que falham de forma proposital (didática de debugging).
+Automação de testes E2E (API + Frontend) para o [ServeRest](https://serverest.dev/) usando
+**Cypress** + **JavaScript**, arquitetada segundo boas práticas de equipes de QA Automation
+(Google, Microsoft, Nubank, Mercado Livre, Shopify, Booking).
 
 ---
 
 ## 🎯 Objetivo
 
-Atender ao desafio técnico com:
+Atender ao desafio técnico com foco em **arquitetura limpa, reutilização, escalabilidade e
+manutenibilidade**, cobrindo:
 
-- 3 cenários de testes de **API** (funcionais)
-- 3 cenários de testes de **frontend** (funcionais)
-- Técnicas de **demonstração de conhecimento**: conjunto paralelo de testes que
-  **falham propositalmente** para evidenciar debugging, status codes e asserts precisos.
-
----
-
-## 🛠 Stack Utilizada
-
-| Ferramenta    | Versão | Uso                                  |
-|---------------|--------|--------------------------------------|
-| Cypress       | 13.x   | Framework de automação E2E           |
-| Node.js       | 18+    | Runtime / scripts                    |
-| JavaScript    | ES6+   | Linguagem dos testes                 |
-| Chrome        | stable | Browser para execução de frontend    |
-
-**Aplicações alvo**
-
-- Frontend: `https://front.serverest.dev/`
-- API (Swagger): `https://serverest.dev/`
+- Testes de **API** (positivos e negativos)
+- Testes de **Frontend** (positivos e negativos)
+- Padrões de projeto (Page Object, Service Object, Factory, Base classes)
+- Validação de contrato (schema) de API
+- CI/CD com GitHub Actions
 
 ---
 
-## 📁 Estrutura de Pastas
+## 🏗 Arquitetura
 
 ```
-.
-├── cypress/
-│   ├── e2e/
-│   │   ├── api/
-│   │   │   ├── valid/            # 3 cenários de API FUNCIONAIS
-│   │   │   │   ├── usuarios_listar.cy.js
-│   │   │   │   ├── usuarios_cadastrar.cy.js
-│   │   │   │   └── login_autenticar.cy.js
-│   │   │   └── failing/          # 3 cenários de API FALHAM PROPOSITALMENTE
-│   │   │       ├── rotas_inexistentes.cy.js
-│   │   │       ├── cadastro_campos_obrigatorios.cy.js
-│   │   │       └── login_email_invalido.cy.js
-│   │   └── frontend/
-│   │       ├── valid/           # 3 cenários de FRONTEND FUNCIONAIS
-│   │       │   ├── login_sucesso.cy.js
-│   │       │   ├── login_credenciais_invalidas.cy.js
-│   │       │   └── cadastro_usuario.cy.js
-│   │       └── failing/         # 3 cenários de FRONTEND FALHAM PROPOSITALMENTE
-│   │           ├── login_sem_senha.cy.js
-│   │           ├── seletor_inexistente.cy.js
-│   │           └── url_inexistente.cy.js
-│   ├── fixtures/
-│   │   └── usuario.json          # Massa de dados reutilizável
-│   ├── support/
-│   │   ├── e2e.js                # Bootstrap dos supports
-│   │   ├── commands.js          # Custom Commands reutilizáveis
-│   │   └── page_objects/        # Page Objects / Service Objects
-│   │       ├── UsersApi.js
-│   │       ├── LoginApi.js
-│   │       └── LoginPage.js
-│   ├── videos/                  # Evidências de execução (geradas)
-│   └── screenshots/             # Evidências de falha (geradas)
-├── cypress.config.js            # Configuração do Cypress 13
-├── package.json                 # Scripts de execução
-├── PONTOS_FORTES.md            # Documentação dos pontos fortes do projeto
-└── README.md
+cypress/
+├── config/              # Configuração centralizada (api, environment)
+├── utils/               # Helpers (faker, helpers, constants, routes, validators)
+├── selectors/           # Seletores centralizados por tela
+├── factories/           # Massa de dados dinâmica (Faker)
+├── services/            # API Services (herdam BaseService)
+├── pages/               # UI Page Objects (herdam BasePage)
+├── commands/            # Custom Commands por domínio
+├── e2e/
+│   ├── api/             # login.cy.js, users.cy.js, products.cy.js
+│   └── frontend/        # login.cy.js, users.cy.js, cart.cy.js
+├── fixtures/            # Dados estáticos (quando necessário)
+├── reports/             # Relatórios (mochawesome, junit) — gerados
+├── screenshots/         # Evidências de falha — geradas
+└── videos/              # Vídeos de execução — gerados
 ```
+
+### Princípios aplicados
+- **SOLID / Single Responsibility**: cada classe tem uma responsabilidade (Pages = UI, Services = API)
+- **DRY**: BasePage/BaseService concentram comportamentos comuns
+- **KISS**: métodos pequenos e semânticos
+- **Clean Code**: nomes claros, sem duplicação, sem hardcoded
+- **Dados dinâmicos**: Faker + cleanup automático (`after`/`afterEach`)
 
 ---
 
-## 🧩 Padrões de Projeto e Inovações Aplicadas
+## 🛠 Tecnologias
 
-### 1. Page Object / Service Object Model
-Encapsulamento de seletores e ações em classes dedicadas
-(`UsersApi`, `LoginApi`, `LoginPage`), eliminando duplicação e facilitando manutenção.
+| Ferramenta | Versão | Uso |
+|------------|--------|-----|
+| Cypress | 13.x | Framework E2E |
+| Node.js | 18+ | Runtime (CI: 20 e 22) |
+| @faker-js/faker | 8.x | Geração de massa |
+| ajv | 8.x | Validação de schema |
+| ESLint | 8.x | Lint |
+| Prettier | 3.x | Formatação |
+| mochawesome | 7.x | Relatórios HTML/JSON |
+| dotenv | 16.x | Variáveis de ambiente |
 
-### 2. Custom Commands Reutilizáveis
-Em `cypress/support/commands.js`:
-- `cy.gerarUsuario(admin)` — gera massa de dados **dinâmica e única** (timestamp).
-- `cy.criarUsuarioViaApi(user)` — cria usuário e valida 201.
-- `cy.loginViaApi(email, password)` — autentica e retorna o token.
-- `cy.loginPage()` — instancia o Page Object de login.
-- `cy.excluirUsuario(id)` — teardown de dados criados.
+---
 
-### 3. Dados Dinâmicos e Testes Independentes
-Todos os testes usam `Date.now()` para e-mails/nomes únicos, evitando colisão entre
-execuções. Nenhum teste depende do estado de outro.
+## 📦 Estrutura de Pastas (detalhe)
 
-### 4. Testes que Falham Propositalmente (Demonstração de Conhecimento)
-Pasta `*/failing/` contém testes com **comentários didáticos** explicando:
-- O erro esperado
-- O que ele revela sobre a API/frontend
-- Como separar "falha de bug" de "falha intencional documentada"
-
-Isso evidencia domínio de:
-- Status codes HTTP corretos (`201`, `400`, `401`, `405`)
-- Retry/timeout do Cypress (elemento não encontrado)
-- Negative testing (validação de contratos de entrada)
-- Roteamento de SPA e tratamento de 404
-
-### 5. Teardown Automático
-O teste de cadastro cria o usuário em `before()` e o remove em `after()`, garantindo
-**limpeza dos dados** criados (critério de qualidade do desafio).
+| Pasta | Conteúdo |
+|-------|----------|
+| `config/api.js` | Endpoints da API |
+| `config/environment.js` | URLs e timeouts por ambiente |
+| `utils/faker.js` | Wrapper do Faker |
+| `utils/helpers.js` | Funções utilitárias puras |
+| `utils/constants.js` | Mensagens, roles, HTTP status |
+| `utils/routes.js` | Rotas de frontend |
+| `utils/validators.js` | Validação de schema (AJV) |
+| `selectors/*.js` | Seletores por tela |
+| `factories/*.js` | UserFactory, ProductFactory |
+| `services/*.js` | LoginService, UsersService, ProductsService |
+| `pages/*.js` | LoginPage, HomePage, UsersPage |
+| `commands/*.js` | login, user, product, api |
 
 ---
 
 ## 🚀 Como Instalar
 
 ```bash
-# Clone o repositório
 git clone https://github.com/ThiagoPhelip/TesteAmbev.git
 cd TesteAmbev
-
-# Instale as dependências
 npm install
+cp .env.example .env   # ajuste se necessário
 ```
 
 ---
 
-## 🧪 Como Executar os Testes
+## 🧪 Como Executar
 
-### Todos os testes
 ```bash
-npm test
-# ou
-npx cypress run
+npm test              # todos os testes (headless)
+npm run api           # apenas API
+npm run frontend      # apenas Frontend
+npm run open          # Cypress em modo interativo
+npm run lint          # ESLint
+npm run lint:fix      # ESLint com autofix
+npm run format        # Prettier (write)
+npm run report        # execução com relatório mochawesome
 ```
 
-### Apenas testes de API
-```bash
-npm run test-api
-```
+> **Frontend no CI:** o frontend (`front.serverest.dev`) utiliza proteção de bot que
+> bloqueia navegadores headless em ambientes de CI. Por isso, o job de frontend no
+> pipeline é marcado como `continue-on-error` (documentado). Os testes de API formam o
+> gate principal e executam em Node 20 e 22.
 
-### Apenas testes de frontend
-```bash
-npm run test-frontend
-```
+---
 
-### Apenas testes FUNCIONAIS (que passam)
-```bash
-npm run test-valid
-```
+## 📊 Massa de Dados
 
-### Apenas testes que FALHAM PROPOSITALMENTE
-```bash
-npm run test-failing
-```
+- Usuário válido padrão (`.env`): `fulano@qa.com` / `teste`
+- Factories geram dados **únicos a cada execução** (Faker + timestamp)
+- Todo dado criado via API é **removido automaticamente** no final do teste (teardown)
+- Nenhuma credencial sensível é versionada (`.env` está no `.gitignore`)
 
-### Modo interativo (Cypress UI)
-```bash
-npm run cypress:open
-```
+---
 
-### Executando com Chrome (recomendado para frontend)
+## 📈 Relatórios
+
+- **Mochawesome**: HTML + JSON em `cypress/reports/mochawesome`
+- **Screenshots/Vídeos**: gerados em caso de falha (ou sempre, conforme config)
+- **JUnit XML**: disponível para integração com outras ferramentas de CI
+
+Gerar relatório:
 ```bash
-npx cypress run --browser chrome --headed
+npm run report
 ```
 
 ---
 
-## 📊 Cenários de Teste
+## ⚙️ CI/CD
 
-### API (funcionais — `cypress/e2e/api/valid/`)
-| Arquivo | Cenário | Assertivas |
-|---------|---------|------------|
-| `usuarios_listar.cy.js` | GET `/usuarios` | status 200, `quantidade`, array `usuarios` |
-| `usuarios_cadastrar.cy.js` | POST `/usuarios` | status 201, mensagem, `_id` (com teardown) |
-| `login_autenticar.cy.js` | POST `/login` | 200 + token; 401 com senha errada |
-
-### API (falham propositalmente — `cypress/e2e/api/failing/`)
-| Arquivo | O que demonstra |
-|---------|-----------------|
-| `rotas_inexistentes.cy.js` | Rota real é `/usuarios`, não `/users` (405) |
-| `cadastro_campos_obrigatorios.cy.js` | API exige campos → 400 (não 201) |
-| `login_email_invalido.cy.js` | E-mail sem `@` é rejeitado (erro, não 200) |
-
-### Frontend (funcionais — `cypress/e2e/frontend/valid/`)
-| Arquivo | Cenário |
-|---------|---------|
-| `login_sucesso.cy.js` | Login válido → redireciona para home |
-| `login_credenciais_invalidas.cy.js` | Senha errada → mensagem de erro visível |
-| `cadastro_usuario.cy.js` | Cadastro com dados dinâmicos → home logada |
-
-### Frontend (falham propositalmente — `cypress/e2e/frontend/failing/`)
-| Arquivo | O que demonstra |
-|---------|-----------------|
-| `login_sem_senha.cy.js` | UI bloqueia submit sem senha (permanece em /login) |
-| `seletor_inexistente.cy.js` | Timeout de elemento não encontrado |
-| `url_inexistente.cy.js` | Rota inexistente → tratamento de 404 |
+Pipeline em `.github/workflows/cypress.yml`:
+- `checkout` → `setup-node` (matrix 20/22) → `npm ci` → `lint` → `cypress run`
+- Upload de relatórios, screenshots e vídeos como artifacts
+- Job de frontend documentado (tolerante a bloqueio de bot)
 
 ---
 
-## 📸 Evidências de Execução
+## 🧠 Decisões Arquiteturais
 
-O Cypress gera automaticamente:
-- **Vídeos** em `cypress/videos/` para cada spec executado
-- **Screenshots** em `cypress/screenshots/` em caso de falha
-
-> As evidências são produzidas a cada `cypress run`. Para reproduzi-las, basta executar
-> os scripts de teste acima — os arquivos de vídeo e screenshot serão regenerados.
-
----
-
-## ✅ Critérios de Avaliação Atendidos
-
-- ✅ **Aderência ao escopo** — Cypress + JavaScript, exatamente como solicitado
-- ✅ **API e Frontend** cobertos (`cy.request()` para API)
-- ✅ **Organização por responsabilidade** — `api/`, `frontend/`, `fixtures/`, `commands/`, `page_objects/`
-- ✅ **Testes independentes e estáveis** — dados dinâmicos, teardown automático
-- ✅ **Assertivas claras** — status, mensagens, tokens, URLs, elementos visíveis
-- ✅ **Boas práticas de código** — POM, Commands, factories simples, sem duplicação
-- ✅ **README completo** — objetivo, stack, estrutura, instalação, execução, massa de dados
-- ✅ **Scripts de execução** — `test`, `test-api`, `test-frontend`, `test-valid`, `test-failing`, `cypress:open`
-- ✅ **Qualidade de entrega** — dados dinâmicos, limpeza de dados, commits claros, sem `node_modules` no repo
-- ✅ **Demonstração de conhecimento** — conjunto explícito de testes que falham propositalmente, documentados
+1. **Separação Pages × Services** — UI e API nunca se misturam
+2. **Base classes** — evitam duplicação de ações comuns
+3. **Factories + Faker** — eliminam massa fixa e colisões
+4. **Selectors centralizados** — mudança de UI em um único lugar
+5. **Validação de schema (AJV)** — contratos de API verificados
+6. **Sem esperas fixas** — retry nativo e assertions inteligentes
+7. **Cleanup automático** — ambiente limpo entre execuções
+8. **Commands por domínio** — organização e reuso
+9. **Variáveis de ambiente** — configuração externa, sem hardcoded
 
 ---
 
-## 📌 Observações sobre Massa de Dados
+## ✅ Critérios Atendidos
 
-- Usuário padrão da API para login válido: `fulano@qa.com` / `teste`
-- Testes que criam dados usam timestamps (`Date.now()`) para garantir unicidade
-- O cadastro de usuário via API é **removido no `after()`**, deixando o ambiente limpo
-- Nenhuma credencial sensível é versionada
+- ✅ Aderência ao escopo (Cypress + JS)
+- ✅ API e Frontend cobertos
+- ✅ Organização por responsabilidade
+- ✅ Testes independentes e estáveis (dados dinâmicos)
+- ✅ Assertivas semânticas e validação de schema
+- ✅ POM, Service Objects, Factories, Base classes
+- ✅ ESLint + Prettier
+- ✅ Relatórios (Mochawesome)
+- ✅ GitHub Actions (matrix Node 20/22)
+- ✅ Commits incrementais e claros
+- ✅ Sem `node_modules`, `.env` ou artefatos no repositório
 
----
-
-Desenvolvido como parte de um desafio técnico para vaga de QA Automation Engineer.
-Veja também [`PONTOS_FORTES.md`](./PONTOS_FORTES.md) para a documentação detalhada dos
-pontos fortes do projeto.
+Veja também [`PONTOS_FORTES.md`](./PONTOS_FORTES.md).
