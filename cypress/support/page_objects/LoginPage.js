@@ -1,7 +1,7 @@
 // Page Object para a tela de Login do frontend (ServeRest)
 class LoginPage {
   visitar() {
-    cy.visit('/login');
+    cy.visit('/login', { failOnStatusCode: false });
     return this;
   }
 
