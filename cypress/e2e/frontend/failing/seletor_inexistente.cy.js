@@ -12,7 +12,7 @@
 
 describe('Frontend - Seletor inexistente (FALHO PROPOSITAL)', () => {
   it('deve falhar pois o seletor [data-testid="botao_magico"] não existe', () => {
-    cy.visit('/login');
+    cy.visit('/login', { failOnStatusCode: false });
     // Seletor propositalmente inexistente -> Cypress aguarda e falha (timeout)
     cy.get('[data-testid="botao_magico"]', { timeout: 5000 }).should('be.visible');
   });

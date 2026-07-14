@@ -12,7 +12,7 @@
 
 describe('Frontend - Navegação para rota inexistente (FALHO PROPOSITAL)', () => {
   it('deve falhar pois /painel-admin não existe no ServeRest', () => {
-    cy.visit('/painel-admin');
+    cy.visit('/painel-admin', { failOnStatusCode: false });
 
     // Asserção incorreta de propósito -> gera evidência de falha
     cy.url().should('include', '/painel-admin'); // <- rota cai em erro 404
